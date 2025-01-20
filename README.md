@@ -11,7 +11,7 @@ I also intend to document the specific Antennas I choose to modify, including vo
 
 ### Controller Hardware
 I tend to favor Adafruit Feather Wings:
-- Microcontroller: [Adafruit Feather M0 Adalogger]( [https://www.adafruit.com/product/2796)
+- Microcontroller: [Adafruit Feather M0 Adalogger](https://www.adafruit.com/product/2796)
 - Motor Controller: [DC Motor + Stepper FeatherWing Add-on For All Feather Boards](https://www.adafruit.com/product/2927)
 - Sensor Interface: [SparkFun Qwiic / Stemma QT FeatherWing (Shield for Thing Plus)](https://www.adafruit.com/product/4515)
 - Sensor (not a feather): [Adafruit 9-DOF Absolute Orientation IMU Fusion Breakout - BNO055 - STEMMA QT / Qwiic](https://www.adafruit.com/product/4646)
