@@ -25,14 +25,6 @@ I tend to favor Adafruit Feather Wings:
 - Sensor Interface:
   - For connecting the BNO055 to the Featherwing stack
   - [SparkFun Qwiic / Stemma QT FeatherWing (Shield for Thing Plus)](https://www.adafruit.com/product/4515)
-  
-### Controller Software
-- [Adafruit Stepper + DC Motor FeatherWing](http://adafruit.github.io/Adafruit_Motor_Shield_V2_Library/html/annotated.html)
-- [AccelStepper Library](http://www.airspayce.com/mikem/arduino/AccelStepper/)
-- [Adafruit_BNO055](https://github.com/adafruit/Adafruit_BNO055)
-
-#### Adafruit Tutorials
-- []()
 
 ## Winegard G2 Carryout
 I am starting with this RV antenna for modification.
