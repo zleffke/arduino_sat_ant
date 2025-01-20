@@ -9,15 +9,30 @@ Future versions may include Raspberry Pis, SDRs, and GNU Radio.
 Control is via USB at the moment, and this repo may contain companion Python code for talking to the arduino.
 I also intend to document the specific Antennas I choose to modify, including voltages, wiring interfaces, etc.
 
-### Controller Hardware
+### Controller Hardware, Software, & Tutorials
 I tend to favor Adafruit Feather Wings:
-- Microcontroller: [Adafruit Feather M0 Adalogger](https://www.adafruit.com/product/2796)
-- Motor Controller: [DC Motor + Stepper FeatherWing Add-on For All Feather Boards](https://www.adafruit.com/product/2927)
-- Sensor Interface: [SparkFun Qwiic / Stemma QT FeatherWing (Shield for Thing Plus)](https://www.adafruit.com/product/4515)
-- Sensor (not a feather): [Adafruit 9-DOF Absolute Orientation IMU Fusion Breakout - BNO055 - STEMMA QT / Qwiic](https://www.adafruit.com/product/4646)
+- Microcontroller: Adafruit Feather M0 Adalogger
+  - Hardware: [Adafruit Feather M0 Adalogger](https://www.adafruit.com/product/2796)
+  - Tutorial: [Adafruit Tutorial](https://learn.adafruit.com/adafruit-feather-m0-adalogger/)
+- Motor Controller: DC Motor + Stepper FeatherWing Add-on For All Feather Boards
+  - Hardware: [DC Motor + Stepper FeatherWing Add-on For All Feather Boards](https://www.adafruit.com/product/2927)
+  - Software: [Adafruit_Motor_Shield_V2_Library](https://github.com/adafruit/Adafruit_Motor_Shield_V2_Library)
+  - Tutorial: [Adafruit Stepper + DC Motor FeatherWing](https://learn.adafruit.com/adafruit-stepper-dc-motor-featherwing/overview)
+- Sensor (not a feather): 
+  - Hardware: [Adafruit 9-DOF Absolute Orientation IMU Fusion Breakout - BNO055 - STEMMA QT / Qwiic](https://www.adafruit.com/product/4646)
+  - Software: [Adafruit_BNO055](https://github.com/adafruit/Adafruit_BNO055)
+  - Tutorial: [Adafruit BNO055 Absolute Orientation Sensor](https://learn.adafruit.com/adafruit-bno055-absolute-orientation-sensor/overview)
+- Sensor Interface:
+  - For connecting the BNO055 to the Featherwing stack
+  - [SparkFun Qwiic / Stemma QT FeatherWing (Shield for Thing Plus)](https://www.adafruit.com/product/4515)
   
 ### Controller Software
-[AccelStepper Library](http://www.airspayce.com/mikem/arduino/AccelStepper/)
+- [Adafruit Stepper + DC Motor FeatherWing](http://adafruit.github.io/Adafruit_Motor_Shield_V2_Library/html/annotated.html)
+- [AccelStepper Library](http://www.airspayce.com/mikem/arduino/AccelStepper/)
+- [Adafruit_BNO055](https://github.com/adafruit/Adafruit_BNO055)
+
+#### Adafruit Tutorials
+- []()
 
 ## Winegard G2 Carryout
 I am starting with this RV antenna for modification.
