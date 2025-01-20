@@ -1,0 +1,182 @@
+/*!
+* @file Comm.h
+*
+* Driver for Communications protocol as referred, in Hamlib.
+*
+* Licensed under the MIT
+*
+*/
+#ifndef LIBRARIES_COMM_H_
+#define LIBRARIES_COMM_H_
+
+#include <Arduino.h>
+#include "globals.h"
+#define BUFFER_SIZE   256   ///< Set the size of serial buffer
+#define BAUDRATE      38400 ///< Set the Baudrate of protocol
+
+/**************************************************************************/
+/*!
+    @brief    Class that functions for communications implementation
+*/
+/**************************************************************************/
+
+class Comm {
+public:
+
+  /**************************************************************************/
+  /*!
+      @brief    Initialize the USB Serial Communications
+  */
+  /**************************************************************************/
+  void init() {
+	  Serial.begin(BAUDRATE);
+    // while (!Serial) {
+    //   ;  // wait for serial port to connect. Needed for native USB port only
+    // }
+    // Serial.println("Start...");
+  }
+
+  /**************************************************************************/
+  /*!
+      @brief    Get the commands and send responses to client
+  */
+  /**************************************************************************/
+  void proc() {
+    // char buffer[BUFFER_SIZE];
+    // char incomingByte;
+    // char *Data = buffer;
+    // char *rawData;
+    // static uint16_t BufferCnt = 0;
+    // char data[100];
+    int serLen = Serial.available();
+    // while (Serial.available() > 0) {
+    //   // incomingByte = Serial.read();
+    //   char c = Serial.read();          // gets one byte from the network buffer
+    //   serIn += c;
+    //   serIn.trim(); 
+    //   serIn.toUpperCase();
+    // }
+    if (serLen > 0){
+      for (int i = 0; i < serLen; i++){
+        char c = Serial.read();          // gets one byte from the network buffer
+        serIn += c;
+      } 
+      serIn.trim(); 
+      serIn.toUpperCase();
+      if (serIn.length() > 0){
+        cmd.received = true;
+        processSerial(serIn);
+      }
+    }
+    // Serial.println(serIn);
+    serIn = "";
+  }
+
+  /**************************************************************************/
+  /*!
+      @brief    If there is input on the serial port process it
+  */
+  /**************************************************************************/
+  void processSerial(String in){
+    
+    // Serial.println(in); //echo
+    if (in.charAt(0) == 'Q'){//query
+      printTlmString(in.charAt(0));
+    }
+    else if (in.charAt(0) == 'D'){//Disable
+      cmd.type = STATE;
+      cmd.state = disabled;
+      Serial.print("$"), Serial.print(in.charAt(0)); 
+      Serial.print(","); Serial.println(millis());
+    }
+    else if (in.charAt(0) == 'I'){//Idle
+      cmd.type = STATE;
+      cmd.state = idle;
+      Serial.print("$"), Serial.print(in.charAt(0));
+      Serial.print(","); Serial.println(millis());
+    }
+    else if (in.charAt(0) == 'H'){//Disable
+      cmd.type = STATE;
+      cmd.state = homing;
+      Serial.print("$"), Serial.print(in.charAt(0));
+      Serial.print(","); Serial.println(millis());
+    }
+    else {
+      Serial.print("$"),
+      Serial.print(in),
+      Serial.println("?");
+    }
+  }
+
+  void printTlmString(char in){
+    Serial.print("$"), Serial.print(in); Serial.print(",");
+    Serial.print(millis()); Serial.print(",");
+    Serial.print(tlm.state); Serial.print(",");
+    Serial.print(tlm.az_cal); Serial.print(",");
+    Serial.print(tlm.el_cal); Serial.print(",");
+    Serial.print(tlm.az_count); Serial.print(",");
+    Serial.print(tlm.el_count); Serial.print(",");
+    Serial.print(tlm.cur_az); Serial.print(",");
+    Serial.print(tlm.cur_el); Serial.print(",");
+    Serial.print(tlm.tar_az); Serial.print(",");
+    Serial.print(tlm.tar_el); Serial.print(",");
+    Serial.print(tlm.az_fault); Serial.print(",");
+    Serial.print(tlm.el_fault);
+    Serial.println();
+  };
+};
+
+/*
+    int serLen = Serial.available();
+      //Serial.print(packetLength); Serial.print(" ");
+    for (int i = 0; i < serLen; i++){
+      char c = Serial.read();          // gets one byte from the network buffer
+      serIn += c;
+      serIn.trim(); 
+      serIn.toUpperCase();
+    }
+    if (serIn.charAt(0) == 'Q'){//query
+      printTlmString();
+    }
+    else if (serIn.charAt(0) == 'D'){//Disable
+      setStateDisabled();
+    }
+    else if (serIn.charAt(0) == 'R'){//Disable
+      el_motor.disable();
+      setStateDisabled();
+    }
+    else if (serIn.charAt(0) == 'S'){//StandBy or STOP
+      setStateStandby();
+    }
+    else if (serIn.charAt(0) == 'P'){//Update Stepper Period
+      updateStepPeriod(serIn);
+    }
+    else if (serIn.charAt(0) == 'E'){//ELEVATION COMMAND
+      if (serIn.charAt(1) == 'X'){//CALIBRATE
+        setStateCalEl();
+      }
+      else if (serIn.charAt(1) == 'S'){//CALIBRATE
+        el_motor.updateMicroStep((uint16_t) abs(serIn.substring(2, serIn.length()).toInt()));
+      }
+      else{//PROCESS ELEVATION COMMAND
+        processElCmd(serIn);
+      }
+    }
+    else if (serIn.charAt(0) == 'A'){//ELEVATION COMMAND
+      if (serIn.charAt(1) == 'X'){//CALIBRATE
+        setStateCalEl();
+      }
+      else if (serIn.charAt(1) == 'S'){//CALIBRATE
+        az_motor.updateMicroStep((uint16_t) abs(serIn.substring(2, serIn.length()).toInt()));
+      }
+      else{//PROCESS ELEVATION COMMAND
+        processAzCmd(serIn);
+      }
+  }
+  else{
+    Serial.println("?");
+  }
+}
+};
+*/
+#endif /* LIBRARIES_COMM_H_ */
