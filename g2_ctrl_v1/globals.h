@@ -15,8 +15,7 @@ struct Motor_Configs{
   uint16_t nativeSPR;   ///< Steps Per Revolution of stepper motor, native to motor
   uint16_t microstep;   ///< microstep setting
   uint16_t SPR;         ///< Steps per Rev of motor, nativeSPR * microstep
-  float minStepPeriod;  ///< Default step period in microseconds
-  float minPulseWidth;  ///< Minimum step period in microseconds
+  float minPulseWidth;  ///< In microsecond for AccelStepper
   float gRatio;         ///< gear ratio of axis
   float MilliAmps;      ///< Max Current Draw of Motor
   float minPos;         ///< Minimum Position of Axis, in degrees
@@ -32,45 +31,34 @@ Motor_Configs el_cfg = {
   .type = false,        ///< True = Az, False = El
   .nativeSPR = 200,     ///< Steps Per Revolution of stepper motor, native to motor
   .microstep = 8,       ///< Microstep Mode of Motor, 
-  .SPR = 1600,          ///< nativeSPR * microstep       
-  .minStepPeriod = 100, ///< Step Period in microseconds
-  .minPulseWidth = 20,  ///< Minimum Pulse Width in microseconds
+  .SPR = 1600,          ///< nativeSPR * microstep  
+  .minPulseWidth = 10,  ///< Minimum step period in microseconds
   .gRatio = 8.0,        ///< Gearing Ratio of Motor to Dish
-  .MilliAmps = 1500,     ///< Max Current Draw of Motor
-  .minPos = 21.0,       ///< Minimum Position, in degrees
+  .minPos = 20.0,       ///< Minimum Position, in degrees
   .maxPos = 95.0,       ///< Maximum Position, in degrees
-  .maxSpeed = 3200,     ///< Max Speed, steps/s, consider microstep
-  .maxAccel = 1600,     ///< Max Acceleration, steps/s^2, consider microstep
+  .maxSpeed = 12800,     ///< Max Speed, steps/s, consider microstep
+  .maxAccel = 6400,     ///< Max Acceleration, steps/s^2, consider microstep
   .homeSpeed = 500,     ///< Speed during homing process
   .homeStep = 50,       ///< homing step margin, in motor steps (not degrees)
-  .homeDelay = 15000    ///< Homing delay in milliseconds for the axis
+  // .homeDelay = 25000    ///< Homing delay in milliseconds for the axis
+  .homeDelay = 1000    ///< Homing delay in milliseconds for the axis
 };
 
 Motor_Configs az_cfg = {
   .type = true,         ///< True = Az, False = El
   .nativeSPR = 200,     ///< Steps Per Revolution of stepper motor, native to motor
-  .microstep = 8,       ///< Microstep Mode of Motor
-  .SPR = 1600,          ///< nativeSPR * microstep
-  .minStepPeriod = 100, ///< Step Period in microseconds
-  .minPulseWidth = 20,  ///< Minimum Pulse Width in microseconds
+  .microstep = 8,       ///< Microstep Mode of Motor, 
+  .SPR = 1600,          ///< nativeSPR * microstep  
+  .minPulseWidth = 10,  ///< Minimum step period in microseconds
   .gRatio = 12.6,       ///< Gearing Ratio of Motor to Dish
-  .MilliAmps = 1500,    ///< Max Current Draw of Motor
   .minPos = 0.0,        ///< Minimum Position, in degrees
   .maxPos = 360.0,      ///< Maximum Position, in degrees
-  .maxSpeed = 3200,     ///< Max Speed, steps/s, consider microstep
+  .maxSpeed = 3200,    ///< Max Speed, steps/s, consider microstep
   .maxAccel = 1600,     ///< Max Acceleration, steps/s^2, consider microstep
-  .homeSpeed = 1000,     ///< Speed during homing process
+  .homeSpeed = 5000,    ///< Speed during homing process
   .homeStep = 50,       ///< homing step margin, in motor steps (not degrees)
-  .homeDelay = 15000    ///< Homing delay in milliseconds for the axis
-};
-
-struct Motor_Pins{
-  uint8_t dir;          ///< Direction Control Pin
-  uint8_t step;         ///< Step Pin
-  uint8_t nSleep;       ///< Sleep Pin, Active LOW
-  uint8_t enable;       ///< Enable Pin, Active HIGH
-  uint8_t nFault;       ///< Fault Pin, Active LOW
-  uint8_t chipSelect;   ///< SPI Chip Select Pin
+  // .homeDelay = 45000    ///< Homing delay in milliseconds for the axis
+  .homeDelay = 1000    ///< Homing delay in milliseconds for the axis
 };
 
 enum _control_mode {
@@ -98,17 +86,18 @@ struct _rotator{
     volatile enum _rotator_state rotator_state;   ///< Rotator status
     volatile enum _rotator_error rotator_error;   ///< Rotator error
     enum _control_mode control_mode;              ///< Control mode
-    bool homing_flag;                             ///< Homing flag
-    bool calibrated;                              ///< True if both motors are calibrated
-    int8_t inside_temperature;                    ///< Inside Temperature
+    bool az_calibrated;                              ///< True if both motors are calibrated
+    bool el_calibrated;                              ///< True if both motors are calibrated
+    bool motion_flag;
     double park_az, park_el;                      ///< Park position for both axis
     volatile uint8_t el_fault, az_fault;          ///< Motor drivers fault flag
 };
 
 _rotator rotator = { .rotator_state = boot, .rotator_error = no_error,
-                     .control_mode = position, .homing_flag = false,
-                     .calibrated = false,
-                     .inside_temperature = 0, .park_az = 0, .park_el = 0,
+                     .control_mode = position,
+                     .az_calibrated = false, .el_calibrated = false,
+                     .motion_flag = false,
+                     .park_az = 180.0, .park_el = 90.0,
                      .el_fault = LOW, .az_fault = LOW};
 
 
@@ -135,10 +124,13 @@ _control control_el = { .input = 0, .input_prv = 0, .speed=0, .setpoint = 0,
 /// Telemetry Structure for feedback
 struct _telemetry{                  
   uint8_t state;
+  bool motion;
   bool az_cal;
   bool el_cal;
   uint32_t az_count;
   uint32_t el_count;
+  uint32_t az_togo;
+  uint32_t el_togo;
   double cur_az;
   double cur_el;
   double tar_az;
@@ -149,10 +141,13 @@ struct _telemetry{
 
 _telemetry tlm = {
   .state = 0, 
+  .motion = false, 
   .az_cal = false,
   .el_cal = false,
   .az_count = 0,
   .el_count = 0,
+  .az_togo = 0,
+  .el_togo = 0,
   .cur_az = 0.0,
   .cur_el = 0.0,
   .tar_az = 0.0,
@@ -164,8 +159,8 @@ _telemetry tlm = {
 enum _cmd_type {
     NONE      = 0, //special type of NONE for init and reset purposes
     STATE     = 1, // control state of rotator
-    GOTOCOUNT = 2, // goto position based on motor counts
-    GOTOPOS   = 4, // goto position based on angles, read tar_az and tar_el
+    GOTOPOS   = 2, // goto position based on angles, read tar_az and tar_el
+    GOTOVEL   = 4, // goto position based on angles, read target velocities
 
 };
 //Telecomand Struct, used to pass commands from Comm.h to Main Loop
